@@ -34,9 +34,27 @@ def cmd_screen(args):
 
 def cmd_thesis(args):
     """Generate AI analyst theses for the shortlist."""
-    logger.info("Thesis generation... (not yet implemented)")
-    # TODO: Phase 3
-    logger.info("Coming in Phase 3 — AI thesis generation")
+    from thesis.generate import generate_thesis
+
+    if args.ticker:
+        logger.info(f"Generating thesis for {args.ticker}...")
+        result = generate_thesis(
+            ticker=args.ticker,
+            model=args.model,
+            max_tokens=args.max_tokens,
+        )
+        if result["success"]:
+            import json
+            print(json.dumps(result["report"], indent=2))
+            logger.info(
+                f"Cost: ${result['cost']:.4f} "
+                f"({result['tokens']['input']}+{result['tokens']['output']} tokens)"
+            )
+        else:
+            logger.error(f"Thesis failed: {result['error']}")
+    else:
+        logger.info("Batch thesis generation coming in next iteration.")
+        logger.info("Use --ticker SYMBOL to test with a single ticker.")
 
 
 def cmd_dashboard(args):
@@ -81,6 +99,8 @@ def main():
     # thesis
     p_thesis = sub.add_parser("thesis", help="Generate AI theses")
     p_thesis.add_argument("--ticker", type=str, help="Run thesis for a single ticker")
+    p_thesis.add_argument("--model", type=str, default="claude-sonnet-4-20250514", help="Anthropic model ID")
+    p_thesis.add_argument("--max-tokens", type=int, default=4096, help="Max output tokens")
 
     # dashboard
     p_dash = sub.add_parser("dashboard", help="Launch Streamlit dashboard")
