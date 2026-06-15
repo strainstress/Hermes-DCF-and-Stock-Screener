@@ -1,0 +1,29 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Secrets (REAL keys — never commit)
+.env
+
+# Data cache (large, regeneratable)
+data/cache/
+
+# Output reports (regenerated each run)
+out/reports/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS
+.DS_Store
+Thumbs.db

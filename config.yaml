@@ -1,0 +1,99 @@
+# Stock Screener Configuration
+# All tunable thresholds, weights, and prompts live here.
+# Change these without touching code.
+
+# ── Universe ──────────────────────────────────────────────────
+universe:
+  indices: ["sp500", "sp400"]
+  exclude_etfs: true
+
+# ── Hard Disqualifiers ────────────────────────────────────────
+disqualifiers:
+  min_market_cap_b: 2.0
+  min_avg_volume_m: 5.0
+  require_positive_fcf: true
+  max_debt_equity: 3.0
+  min_altman_z: 1.8
+
+# ── Scoring Model ─────────────────────────────────────────────
+scoring:
+  weights:
+    growth: 0.40
+    quality: 0.35
+    momentum: 0.25
+
+  # Growth factors (40% of composite)
+  growth:
+    metrics:
+      revenue_yoy_ttm: 0.25
+      revenue_cagr_3yr: 0.20
+      eps_growth_ttm: 0.20
+      forward_revenue_growth: 0.15
+      reinvestment_rate: 0.10
+      rule_of_40: 0.10
+
+  # Quality factors (35% of composite)
+  quality:
+    metrics:
+      roe_ttm: 0.20
+      roic: 0.20
+      gross_margin_ttm: 0.15
+      fcf_margin_ttm: 0.15
+      net_debt_ebitda: 0.15
+      accruals_ratio: 0.10
+      interest_coverage: 0.05
+
+  # Momentum factors (25% of composite)
+  momentum:
+    metrics:
+      return_6m_excl_1m: 0.30
+      return_12m: 0.25
+      return_1m: 0.15
+      earnings_surprise: 0.15
+      ma_ratio_50_200: 0.15
+
+  # Sharpe ratio — risk-adjusted momentum (hidden gem detector)
+  # A stock with 15% return and 10% vol (Sharpe 1.5) beats one with 30% return and 40% vol (Sharpe 0.75)
+  sharpe:
+    enabled: true
+    weight_in_momentum: 0.20   # redistributes from 6m/12m return weights when enabled
+    window_days: 252
+    risk_free_rate: 0.045
+
+  # Hidden Markov Model — regime-aware scoring
+  # Detects Bull/Sideways/Bear regimes per stock. Surfaces stocks outperforming
+  # their regime peers (e.g., +10% in a Bear regime > +10% in a Bull regime).
+  hmm:
+    enabled: true
+    n_components: 3             # Bear / Sideways / Bull
+    n_seeds: 20                 # random seeds tried for convergence (best score wins)
+    n_iter: 500                 # EM iterations
+    window_days: 504            # 2 trading years
+    regime_bonus: 0.10          # max bonus for stocks beating regime expectations
+    max_stocks_for_hmm: 200     # only fit HMM on top N pre-scored stocks (performance)
+
+# ── AI Thesis Generation ──────────────────────────────────────
+thesis:
+  shortlist_size: 30
+  min_score: 70
+  model: "claude-sonnet-4-20250514"
+  max_tokens: 4096
+  retry_on_schema_fail: true
+  max_retries: 1
+
+# ── Data Sources ──────────────────────────────────────────────
+data:
+  polygon:
+    base_url: "https://api.polygon.io"
+    cache_ttl_hours: 24
+  edgar:
+    base_url: "https://www.sec.gov"
+    user_agent: "stock-screener/0.1.0"
+  cache_dir: "data/cache"
+
+# ── Output ────────────────────────────────────────────────────
+output:
+  dashboard:
+    port: 8501
+  notion:
+    enabled: false
