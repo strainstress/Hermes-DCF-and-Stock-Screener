@@ -33,6 +33,9 @@ dev = [
 line-length = 100
 target-version = "py311"
 
+[tool.setuptools.packages.find]
+include = ["data*", "screen*", "thesis*", "out*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
