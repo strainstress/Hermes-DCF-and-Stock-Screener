@@ -36,6 +36,7 @@ def build_user_prompt(
     composite_score: float,
     sharpe_ratio: float,
     hmm_regime: str,
+    sentiment_context: str = "",
 ) -> str:
     """Build the full user prompt for one ticker.
 
@@ -72,6 +73,8 @@ def build_user_prompt(
 
 ### Peer Financial Comparison
 {peer_financials or "Not available"}
+
+{sentiment_context}
 
 ## Your Task
 
@@ -112,6 +115,7 @@ def build_messages(
     transcripts: str = "",
     recent_news: str = "",
     peer_financials: str = "",
+    sentiment_context: str = "",
     growth_score: float = 0,
     quality_score: float = 0,
     momentum_score: float = 0,
@@ -135,6 +139,7 @@ def build_messages(
         transcripts=transcripts,
         recent_news=recent_news,
         peer_financials=peer_financials,
+        sentiment_context=sentiment_context,
         growth_score=growth_score,
         quality_score=quality_score,
         momentum_score=momentum_score,

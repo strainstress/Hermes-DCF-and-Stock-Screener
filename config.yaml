@@ -72,6 +72,14 @@ scoring:
     regime_bonus: 0.10          # max bonus for stocks beating regime expectations
     max_stocks_for_hmm: 200     # only fit HMM on top N pre-scored stocks (performance)
 
+  # Market sentiment — Reddit, StockTwits, Yahoo Finance
+  # NLP-scored sentiment feeds into thesis prompts and dashboard.
+  # Optional: can be toggled off for speed (free APIs have rate limits).
+  sentiment:
+    enabled: true
+    sources: ["reddit", "stocktwits", "yahoo_news"]  # active sources
+    weight_in_thesis: 0.05      # small bonus weight in composite (experimental)
+
 # ── AI Thesis Generation ──────────────────────────────────────
 thesis:
   shortlist_size: 30

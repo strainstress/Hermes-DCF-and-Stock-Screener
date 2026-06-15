@@ -24,6 +24,7 @@ from thesis.sources import (
     fetch_latest_10q,
     extract_relevant_excerpts,
 )
+from thesis.sentiment import fetch_all_sentiment, sentiment_to_context
 
 
 def get_client() -> Anthropic:
@@ -89,6 +90,15 @@ def generate_thesis(
         logger.warning(f"[{ticker}] No CIK found — skipping SEC filings")
 
     # ── Build prompt ───────────────────────────────────────────
+    # Fetch sentiment data
+    logger.info(f"[{ticker}] Fetching market sentiment...")
+    sentiment_data = fetch_all_sentiment(ticker)
+    sentiment_context = sentiment_to_context(sentiment_data)
+    logger.info(
+        f"[{ticker}] Sentiment: {sentiment_data['aggregate'].get('sentiment_ratio', 0):.2f} "
+        f"({sentiment_data['aggregate'].get('total_mentions', 0)} mentions)"
+    )
+
     messages = build_messages(
         ticker=ticker,
         name=name or ticker,
@@ -100,6 +110,7 @@ def generate_thesis(
         transcripts="",  # Future: FMP integration
         recent_news="",  # Future: NewsAPI integration
         peer_financials="",  # Future: peer comparison
+        sentiment_context=sentiment_context,
         growth_score=growth_score,
         quality_score=quality_score,
         momentum_score=momentum_score,
