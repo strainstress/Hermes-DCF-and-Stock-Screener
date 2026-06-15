@@ -73,6 +73,18 @@ def cmd_dashboard(args):
     )
 
 
+def cmd_notion_sync(args):
+    """Sync scored tickers to Notion database."""
+    from out.notion_sync import sync_from_cache
+
+    logger.info("Syncing to Notion...")
+    result = sync_from_cache(limit=args.limit)
+    logger.info(
+        f"Done — {result['synced']} synced, "
+        f"{result['skipped']} skipped, {result['errors']} errors"
+    )
+
+
 def cmd_all(args):
     """Run the full pipeline: ingest → screen → thesis → dashboard."""
     cmd_ingest(args)
@@ -106,6 +118,10 @@ def main():
     p_dash = sub.add_parser("dashboard", help="Launch Streamlit dashboard")
     p_dash.add_argument("--port", type=int, default=8501, help="Port (default: 8501)")
 
+    # notion-sync
+    p_notion = sub.add_parser("notion-sync", help="Sync to Notion database")
+    p_notion.add_argument("--limit", type=int, default=None, help="Max tickers to sync")
+
     # all
     p_all = sub.add_parser("all", help="Run full pipeline")
     p_all.add_argument("--force", action="store_true", help="Force refresh ingest")
@@ -120,6 +136,8 @@ def main():
         cmd_thesis(args)
     elif args.command == "dashboard":
         cmd_dashboard(args)
+    elif args.command == "notion-sync":
+        cmd_notion_sync(args)
     elif args.command == "all":
         cmd_all(args)
     else:
